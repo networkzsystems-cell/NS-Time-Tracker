@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { ArrowLeft, KeyRound, Loader2, LockKeyhole, UserRound } from 'lucide-react';
+import { ArrowLeft, KeyRound, Loader as Loader2, LockKeyhole, UserRound } from 'lucide-react';
 
 type LoginPageProps = {
   onBack: () => void;

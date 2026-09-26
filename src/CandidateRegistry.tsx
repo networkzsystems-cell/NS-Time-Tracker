@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
-import { ArrowLeft, BookUser, Download, Loader2, LogOut, Plus, RefreshCw, Search, Trash2 } from 'lucide-react';
+import { ArrowLeft, BookUser, Download, Loader as Loader2, LogOut, Plus, RefreshCw, Search, Trash2 } from 'lucide-react';
 import { supabase, type Candidate, type CandidateDomain } from '@/lib/supabase';
 
 async function generateCandidateCode(category: Candidate['category']): Promise<string> {
@@ -28,10 +28,10 @@ const emptyForm: CandidateForm = {
   mobile: '',
   place: '',
   category: 'Fresher',
-  domain: 'Civil',
+  domain: 'Python',
 };
 
-const DOMAINS: CandidateDomain[] = ['Civil', 'Mechanical', 'Commerce'];
+const DOMAINS: CandidateDomain[] = ['Python', 'Networking', '.Net', 'Digital marketing'];
 
 function previewCode(candidates: Candidate[], category: Candidate['category']): string {
   const prefix = category === 'Fresher' ? 'F' : 'E';

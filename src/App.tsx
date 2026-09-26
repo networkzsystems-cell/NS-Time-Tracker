@@ -1,27 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Play,
-  Square,
-  Download,
-  Clock,
-  Timer,
-  Mail,
-  Building2,
-  Hash,
-  Loader2,
-  AlertCircle,
-  Activity,
-  Trash2,
-  X,
-  Layers,
-  LogIn,
-  Search,
-  BookUser,
-  User,
-  AlertTriangle,
-  RefreshCw,
-  ChevronDown,
-} from 'lucide-react';
+import { Play, Square, Download, Clock, Timer, Mail, Building2, Hash, Loader as Loader2, CircleAlert as AlertCircle, Activity, Trash2, X, Layers, LogIn, Search, BookUser, User, TriangleAlert as AlertTriangle, RefreshCw, ChevronDown } from 'lucide-react';
 import { supabase, type TimeEntry, type Candidate, type FeedbackValue } from '@/lib/supabase';
 import CandidateRegistry from '@/CandidateRegistry';
 import LoginPage from '@/LoginPage';
