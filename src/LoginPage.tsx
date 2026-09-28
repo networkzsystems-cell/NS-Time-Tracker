@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { ArrowLeft, KeyRound, Loader as Loader2, LockKeyhole, UserRound } from 'lucide-react';
+import { supabase, type AppSettings } from '@/lib/supabase';
 
 type LoginPageProps = {
   onBack: () => void;
@@ -12,17 +13,34 @@ export default function LoginPage({ onBack, onSuccess }: LoginPageProps) {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError('');
     setSubmitting(true);
 
-    if (username.trim() === 'Reception' && password === 'NSPLOGIN') {
-      onSuccess();
-      return;
-    }
+    try {
+      const { data, error } = await supabase
+        .from('app_settings')
+        .select('*')
+        .eq('id', 1)
+        .maybeSingle();
 
-    setError('Incorrect username or password.');
+      if (error || !data) {
+        setError('Could not verify credentials. Please try again.');
+        setSubmitting(false);
+        return;
+      }
+
+      const settings = data as AppSettings;
+      if (username.trim() === settings.username && password === settings.password) {
+        onSuccess();
+        return;
+      }
+
+      setError('Incorrect username or password.');
+    } catch {
+      setError('Could not verify credentials. Please try again.');
+    }
     setSubmitting(false);
   };
 

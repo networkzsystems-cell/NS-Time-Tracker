@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { ArrowLeft, BookUser, Download, Loader as Loader2, LogOut, Plus, RefreshCw, Search, Trash2 } from 'lucide-react';
-import { supabase, type Candidate, type CandidateDomain } from '@/lib/supabase';
+import { supabase, type Candidate, type CandidateDomain, type Domain } from '@/lib/supabase';
+import Settings from '@/Settings';
 
 async function generateCandidateCode(category: Candidate['category']): Promise<string> {
   const { data, error } = await supabase.rpc('generate_candidate_code', { p_category: category });
@@ -28,10 +29,8 @@ const emptyForm: CandidateForm = {
   mobile: '',
   place: '',
   category: 'Fresher',
-  domain: 'Python',
+  domain: '',
 };
-
-const DOMAINS: CandidateDomain[] = ['Python', 'Networking', '.Net', 'Digital marketing'];
 
 function previewCode(candidates: Candidate[], category: Candidate['category']): string {
   const prefix = category === 'Fresher' ? 'F' : 'E';
@@ -47,12 +46,32 @@ function previewCode(candidates: Candidate[], category: Candidate['category']): 
 
 export default function CandidateRegistry({ onBack, onLogout }: CandidateRegistryProps) {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [domains, setDomains] = useState<Domain[]>([]);
   const [form, setForm] = useState<CandidateForm>(emptyForm);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [error, setError] = useState('');
+  const [showSettings, setShowSettings] = useState(false);
+
+  const domainNames = useMemo(() => domains.map((d) => d.name), [domains]);
+
+  const fetchDomains = useCallback(async () => {
+    const { data, error: fetchError } = await supabase
+      .from('domains')
+      .select('*')
+      .order('name', { ascending: true });
+
+    if (fetchError) return;
+    const rows = (data ?? []) as Domain[];
+    setDomains(rows);
+    setForm((current) => {
+      if (current.domain && rows.some((d) => d.name === current.domain)) return current;
+      const first = rows[0]?.name ?? '';
+      return { ...current, domain: first };
+    });
+  }, []);
 
   const fetchCandidates = useCallback(async () => {
     const { data, error: fetchError } = await supabase
@@ -69,8 +88,9 @@ export default function CandidateRegistry({ onBack, onLogout }: CandidateRegistr
 
   useEffect(() => {
     setLoading(true);
+    fetchDomains();
     fetchCandidates().finally(() => setLoading(false));
-  }, [fetchCandidates]);
+  }, [fetchCandidates, fetchDomains]);
 
   const filteredCandidates = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -148,9 +168,13 @@ export default function CandidateRegistry({ onBack, onLogout }: CandidateRegistr
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 shadow-sm">
+            <button
+              onClick={() => setShowSettings(true)}
+              title="Settings"
+              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 shadow-sm transition hover:from-sky-600 hover:to-blue-700 active:scale-95"
+            >
               <BookUser className="h-5 w-5 text-white" />
-            </div>
+            </button>
             <div>
               <h1 className="text-base font-bold leading-tight text-slate-900 sm:text-lg">Candidate Registry</h1>
               <p className="hidden text-xs text-slate-500 sm:block">Reception desk · NS Job Fair</p>
@@ -215,7 +239,7 @@ export default function CandidateRegistry({ onBack, onLogout }: CandidateRegistr
                 onChange={(event) => setForm((current) => ({ ...current, domain: event.target.value as CandidateDomain }))}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none transition focus:border-sky-400 focus:bg-white focus:ring-2 focus:ring-sky-100"
               >
-                {DOMAINS.map((d) => (
+                {domainNames.map((d) => (
                   <option key={d} value={d}>{d}</option>
                 ))}
               </select>
@@ -280,6 +304,13 @@ export default function CandidateRegistry({ onBack, onLogout }: CandidateRegistr
           )}
         </section>
       </main>
+
+      {showSettings && (
+        <Settings
+          onClose={() => setShowSettings(false)}
+          onDomainsChanged={fetchDomains}
+        />
+      )}
 
       {/* Floating Refresh Button */}
       <button

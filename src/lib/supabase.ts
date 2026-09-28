@@ -7,7 +7,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   realtime: { params: { eventsPerSecond: 10 } },
 });
 
-export type CandidateDomain = 'Python' | 'Networking' | '.Net' | 'Digital marketing';
+export type CandidateDomain = string;
 
 export interface Candidate {
   id: number;
@@ -27,6 +27,19 @@ export type FeedbackValue =
   | 'Course Interested'
   | 'Both'
   | 'N/A';
+
+export interface Domain {
+  id: number;
+  name: string;
+  created_at: string;
+}
+
+export interface AppSettings {
+  id: number;
+  username: string;
+  password: string;
+  updated_at: string;
+}
 
 export interface TimeEntry {
   id: number;
